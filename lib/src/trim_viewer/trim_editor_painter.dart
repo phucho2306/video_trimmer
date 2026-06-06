@@ -119,16 +119,29 @@ class TrimEditorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final rect = Rect.fromPoints(startPos, endPos);
+    if (rect.width <= 0 || rect.height <= 0) return;
+
     var borderPaint = Paint()
       ..color = borderPaintColor
       ..strokeWidth = borderWidth
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    var circlePaint = Paint()
+    var selectionFillPaint = Paint()
+      ..color = borderPaintColor.withValues(alpha: 0.10)
+      ..style = PaintingStyle.fill;
+
+    var handlePaint = Paint()
       ..color = circlePaintColor
       ..strokeWidth = 1
       ..style = PaintingStyle.fill
+      ..strokeCap = StrokeCap.round;
+
+    var gripPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.82)
+      ..strokeWidth = 1.6
+      ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
     var scrubberPaint = Paint()
@@ -137,11 +150,12 @@ class TrimEditorPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    final rect = Rect.fromPoints(startPos, endPos);
     final roundedRect = RRect.fromRectAndRadius(
       rect,
       Radius.circular(borderRadius),
     );
+
+    canvas.drawRRect(roundedRect, selectionFillPaint);
 
     if (showScrubber) {
       if (scrubberAnimationDx.toInt() > startPos.dx.toInt()) {
@@ -154,12 +168,44 @@ class TrimEditorPainter extends CustomPainter {
     }
 
     canvas.drawRRect(roundedRect, borderPaint);
-    // Paint start holder
-    canvas.drawCircle(
-        startPos + Offset(0, endPos.dy / 2), startCircleSize, circlePaint);
-    // Paint end holder
-    canvas.drawCircle(
-        endPos + Offset(0, -endPos.dy / 2), endCircleSize, circlePaint);
+
+    final handleWidth = (startCircleSize * 2).clamp(12.0, 18.0);
+    final handleRadius = Radius.circular(handleWidth / 2);
+    final startHandleRect = Rect.fromLTWH(
+      rect.left - handleWidth / 2,
+      rect.top,
+      handleWidth,
+      rect.height,
+    );
+    final endHandleRect = Rect.fromLTWH(
+      rect.right - handleWidth / 2,
+      rect.top,
+      handleWidth,
+      rect.height,
+    );
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(startHandleRect, handleRadius),
+      handlePaint,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(endHandleRect, handleRadius),
+      handlePaint,
+    );
+
+    final gripHeight = rect.height * 0.32;
+    final gripTop = rect.center.dy - gripHeight / 2;
+    final gripBottom = rect.center.dy + gripHeight / 2;
+    canvas.drawLine(
+      Offset(startHandleRect.center.dx, gripTop),
+      Offset(startHandleRect.center.dx, gripBottom),
+      gripPaint,
+    );
+    canvas.drawLine(
+      Offset(endHandleRect.center.dx, gripTop),
+      Offset(endHandleRect.center.dx, gripBottom),
+      gripPaint,
+    );
   }
 
   @override

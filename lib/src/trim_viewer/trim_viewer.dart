@@ -80,6 +80,23 @@ class TrimViewer extends StatefulWidget {
   /// calculated on the `maxVideoLength` value.
   final double paddingFraction;
 
+  /// Scales the scrollable timeline width.
+  ///
+  /// A value of `1.0` keeps the default timeline density. Higher values zoom in,
+  /// generating more thumbnails and allowing finer trim adjustments.
+  final double timelineScale;
+
+  /// Smallest allowed timeline scale.
+  final double minTimelineScale;
+
+  /// Largest allowed timeline scale.
+  final double maxTimelineScale;
+
+  /// Callback to the current timeline scale.
+  ///
+  /// Returns the zoom level when it changes from a pinch gesture.
+  final ValueChanged<double>? onChangeTimelineScale;
+
   /// Properties for customizing the trim editor.
   final TrimEditorProperties editorProperties;
 
@@ -181,10 +198,15 @@ class TrimViewer extends StatefulWidget {
     this.onChangeEnd,
     this.onChangePlaybackState,
     this.paddingFraction = 0.2,
+    this.timelineScale = 1.0,
+    this.minTimelineScale = 1.0,
+    this.maxTimelineScale = 1.5,
+    this.onChangeTimelineScale,
     this.editorProperties = const TrimEditorProperties(),
     this.areaProperties = const TrimAreaProperties(),
     this.onThumbnailLoadingComplete,
-  });
+  })  : assert(minTimelineScale > 0),
+        assert(maxTimelineScale >= minTimelineScale);
 
   @override
   State<TrimViewer> createState() => _TrimViewerState();
@@ -207,8 +229,13 @@ class _TrimViewerState extends State<TrimViewer> with TickerProviderStateMixin {
                 ((paddingFraction * maxVideoLength.inMilliseconds) * 2)
                     .toInt()));
 
-        final shouldScroll = trimAreaDuration <= totalDuration &&
-            maxVideoLength.compareTo(const Duration(milliseconds: 0)) != 0;
+        final hasTimelineZoom =
+            widget.maxTimelineScale > widget.minTimelineScale;
+        final shouldScroll = maxVideoLength.compareTo(
+                  const Duration(milliseconds: 0),
+                ) !=
+                0 &&
+            (trimAreaDuration <= totalDuration || hasTimelineZoom);
         if (widget.type == ViewerType.scrollable && !shouldScroll) {
           throw 'Total video duration is less than maxVideoLength + padding. '
               'Can\'t use `ScrollableTrimViewer`. Change the type to `ViewerType.auto`.';
@@ -232,6 +259,10 @@ class _TrimViewerState extends State<TrimViewer> with TickerProviderStateMixin {
       onChangeEnd: widget.onChangeEnd,
       onChangePlaybackState: widget.onChangePlaybackState,
       paddingFraction: widget.paddingFraction,
+      timelineScale: widget.timelineScale,
+      minTimelineScale: widget.minTimelineScale,
+      maxTimelineScale: widget.maxTimelineScale,
+      onChangeTimelineScale: widget.onChangeTimelineScale,
       editorProperties: widget.editorProperties,
       areaProperties: widget.areaProperties,
       onThumbnailLoadingComplete: () {

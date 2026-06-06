@@ -84,4 +84,6 @@ example/android/app/.cxx/
 
 
 example/ios/Flutter/.last_build_id
+example/ios/Flutter/ephemeral/
+example/ios/**/xcshareddata/swiftpm/
 .fvm/

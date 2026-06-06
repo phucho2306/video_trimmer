@@ -1,6 +1,7 @@
 library;
 
 export 'package:video_trimmer/src/trimmer.dart';
+export 'package:video_trimmer/src/trimmer_view.dart';
 export 'package:video_trimmer/src/video_viewer.dart';
 export 'package:video_trimmer/src/utils/duration_style.dart';
 export 'package:video_trimmer/src/utils/storage_dir.dart';

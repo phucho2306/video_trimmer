@@ -57,6 +57,7 @@ class FixedThumbnailViewer extends StatelessWidget {
         numberOfThumbnails: numberOfThumbnails,
         thumbnailHeight: thumbnailHeight,
         quality: quality,
+        densityLevel: ThumbnailDensityLevel.low,
         onThumbnailLoadingComplete: onThumbnailLoadingComplete,
       ),
       builder: (context, snapshot) {
